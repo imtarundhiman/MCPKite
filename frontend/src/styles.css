@@ -797,8 +797,6 @@ select { min-height: 44px; }
   color: #778394;
   font-size: 12px;
 }
-.footer-divider { padding: 0 3px; color: #a2abb6; }
-
 @media (max-width: 900px) {
   :root { --page-gutter: 24px; }
   .shell { padding: 0 var(--page-gutter); }

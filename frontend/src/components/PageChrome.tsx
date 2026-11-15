@@ -122,8 +122,7 @@ export function Header({ user, onLogout }: HeaderProps) {
 export function Footer() {
   return (
     <footer className="footer">
-      <span>MCPKite <span className="footer-divider">·</span> Workspace console</span>
-      <span>Manage MCP endpoints and workspace access</span>
+      <span>© {new Date().getFullYear()} MCPkite</span>
     </footer>
   );
 }
