@@ -1,0 +1,265 @@
+x-sandbox-limits: &sandbox-limits
+  TOOL_SANDBOX_CPU_LIMIT: ${TOOL_SANDBOX_CPU_LIMIT:-1}
+  TOOL_SANDBOX_MEMORY_MIB: ${TOOL_SANDBOX_MEMORY_MIB:-256}
+  TOOL_SANDBOX_PIDS_LIMIT: ${TOOL_SANDBOX_PIDS_LIMIT:-32}
+  TOOL_SANDBOX_TIMEOUT_SECONDS: ${TOOL_SANDBOX_TIMEOUT_SECONDS:-10}
+  TOOL_SANDBOX_TMPFS_MIB: ${TOOL_SANDBOX_TMPFS_MIB:-32}
+  TOOL_SANDBOX_MAX_CONCURRENT_RUNS: ${TOOL_SANDBOX_MAX_CONCURRENT_RUNS:-4}
+  TOOL_SANDBOX_QUEUE_TIMEOUT_SECONDS: ${TOOL_SANDBOX_QUEUE_TIMEOUT_SECONDS:-2}
+  TOOL_SANDBOX_MAX_SOURCE_BYTES: ${TOOL_SANDBOX_MAX_SOURCE_BYTES:-20000}
+  TOOL_SANDBOX_MAX_PARAMETERS: ${TOOL_SANDBOX_MAX_PARAMETERS:-64}
+  TOOL_SANDBOX_MAX_INPUT_BYTES: ${TOOL_SANDBOX_MAX_INPUT_BYTES:-65536}
+  TOOL_SANDBOX_MAX_OUTPUT_BYTES: ${TOOL_SANDBOX_MAX_OUTPUT_BYTES:-262144}
+  TOOL_SANDBOX_PROXY_MAX_CONNECTIONS: ${TOOL_SANDBOX_PROXY_MAX_CONNECTIONS:-128}
+  TOOL_SANDBOX_PROXY_IDLE_TIMEOUT_SECONDS: ${TOOL_SANDBOX_PROXY_IDLE_TIMEOUT_SECONDS:-15}
+  TOOL_SANDBOX_PROXY_MAX_TUNNEL_BYTES: ${TOOL_SANDBOX_PROXY_MAX_TUNNEL_BYTES:-10485760}
+  TOOL_SANDBOX_PROXY_MAX_HEADER_BYTES: ${TOOL_SANDBOX_PROXY_MAX_HEADER_BYTES:-65536}
+
+x-resource-storage: &resource-storage
+  RESOURCE_STORAGE_PROVIDER: ${RESOURCE_STORAGE_PROVIDER:-s3}
+  RESOURCE_S3_BUCKET: ${RESOURCE_S3_BUCKET:-webmcp-resources}
+  RESOURCE_S3_REGION: ${RESOURCE_S3_REGION:-us-east-1}
+  RESOURCE_S3_ENDPOINT_URL: ${RESOURCE_S3_ENDPOINT_URL-http://s3mock:9090}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-s3mock}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-s3mock}
+  RESOURCE_AZURE_CONNECTION_STRING: \"${RESOURCE_AZURE_CONNECTION_STRING:-}\"
+  RESOURCE_AZURE_CONTAINER: ${RESOURCE_AZURE_CONTAINER:-webmcp-resources}
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: mcp_platform
+      POSTGRES_USER: mcp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mcp_local_dev}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcp -d mcp_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:9.10
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:?Set PGADMIN_DEFAULT_EMAIL in the root .env}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD in the root .env}
+      PGADMIN_DISABLE_POSTFIX: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  s3mock:
+    image: adobe/s3mock:5.2.3
+    environment:
+      COM_ADOBE_TESTING_S3MOCK_STORE_ROOT: /s3mockroot
+      COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS: ${RESOURCE_S3_BUCKET:-webmcp-resources}
+      COM_ADOBE_TESTING_S3MOCK_STORE_RETAIN_FILES_ON_EXIT: "true"
+    volumes:
+      - s3mock-data:/s3mockroot
+    ports:
+      - "127.0.0.1:9000:9090"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/favicon.ico"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.33.0
+    command:
+      - azurite-blob
+      - --blobHost
+      - 0.0.0.0
+      - --blobPort
+      - "10000"
+      - --location
+      - /data
+    volumes:
+      - azurite-data:/data
+    ports:
+      - "127.0.0.1:10000:10000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "const net = require('net'); const socket = net.connect(10000, '127.0.0.1'); socket.on('connect', () => { socket.end(); process.exit(0); }); socket.on('error', () => process.exit(1));"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  resource-storage-init:
+    image: webmcp-backend:local
+    build:
+      context: ./backend
+    command: ["python", "-m", "app.local_storage_init"]
+    environment:
+      AZURITE_INIT_CONNECTION_STRING: \"${AZURITE_INIT_CONNECTION_STRING:-}\"
+      AZURITE_INIT_CONTAINER: ${RESOURCE_AZURE_CONTAINER:-webmcp-resources}
+    depends_on:
+      s3mock:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    image: webmcp-backend:local
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://mcp:${POSTGRES_PASSWORD:-mcp_local_dev}@db:5432/mcp_platform
+      WATCHFILES_FORCE_POLLING: "true"
+      <<: [*sandbox-limits, *resource-storage]
+      TOOL_RUNNER_URL: http://tool-runner:8001
+      TOOL_RUNNER_TOKEN_FILE: /run/secrets/tool-runner/token
+    volumes:
+      - ./backend/app:/app/app:ro
+      - ./backend/migrations:/app/migrations:ro
+      - ./backend/alembic.ini:/app/alembic.ini:ro
+      - tool-runner-token:/run/secrets/tool-runner:ro
+    command:
+      - sh
+      - -c
+      - alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --reload --reload-dir /app/app --reload-dir /app/migrations
+    networks:
+      default: {}
+      inspector-control:
+        aliases:
+          - backend
+      sandbox-control: {}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      tool-runner:
+        condition: service_healthy
+      resource-storage-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    environment:
+      VITE_DEV_API_PROXY_TARGET: http://backend:8000
+      VITE_MCP_ENDPOINT_BASE_URL: ${VITE_MCP_ENDPOINT_BASE_URL:-http://localhost:8000}
+      VITE_USE_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:5173"
+
+  inspector:
+    image: ghcr.io/modelcontextprotocol/inspector:2.13.0
+    environment:
+      MCP_AUTO_OPEN_ENABLED: "false"
+    networks:
+      - inspector-control
+    ports:
+      - "127.0.0.1:6274:6274"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  tool-runner-token-init:
+    image: python:3.12-alpine
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "if [ ! -s /run/secrets/tool-runner/token ]; then umask 077; python -c 'import secrets; print(secrets.token_urlsafe(48))' > /run/secrets/tool-runner/token; fi"
+    network_mode: none
+    restart: "no"
+    volumes:
+      - tool-runner-token:/run/secrets/tool-runner
+
+  tool-sandbox-image:
+    image: webmcp-tool-sandbox:local
+    build:
+      context: .
+      dockerfile: sandbox/Dockerfile
+    entrypoint: ["/bin/true"]
+    network_mode: none
+    restart: "no"
+
+  tool-egress-proxy-image:
+    image: webmcp-egress-proxy:local
+    build:
+      context: .
+      dockerfile: sandbox/proxy.Dockerfile
+    entrypoint: ["/bin/true"]
+    restart: "no"
+    networks:
+      - sandbox-egress
+
+  tool-runner:
+    image: webmcp-tool-runner:local
+    build:
+      context: .
+      dockerfile: runner/Dockerfile
+    environment:
+      <<: *sandbox-limits
+      TOOL_RUNNER_TOKEN_FILE: /run/secrets/tool-runner/token
+      TOOL_SANDBOX_EGRESS_NETWORK: webmcp_tool_sandbox_egress
+      TOOL_SANDBOX_IMAGE: webmcp-tool-sandbox:local
+      TOOL_SANDBOX_PROXY_IMAGE: webmcp-egress-proxy:local
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - tool-runner-token:/run/secrets/tool-runner:ro
+    networks:
+      - sandbox-control
+    depends_on:
+      tool-runner-token-init:
+        condition: service_completed_successfully
+      tool-sandbox-image:
+        condition: service_completed_successfully
+      tool-egress-proxy-image:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=3)"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  tool-runner-token:
+  s3mock-data:
+  azurite-data:
+
+networks:
+  inspector-control:
+    name: webmcp_inspector_control
+  sandbox-control:
+    name: webmcp_tool_sandbox_control
+    internal: true
+  sandbox-egress:
+    name: webmcp_tool_sandbox_egress

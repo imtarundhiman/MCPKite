@@ -165,18 +165,25 @@ Choose one storage provider for the deployment:
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Optional paired credentials; when unset, the AWS SDK credential chain is used. |
 | `RESOURCE_AZURE_CONNECTION_STRING` | Azure Blob connection string. Required when Azure Blob is selected. |
 | `RESOURCE_AZURE_CONTAINER` | Private Azure Blob container name. |
+| `AZURITE_INIT_CONNECTION_STRING` | Optional local-only connection string used to create the container in Azurite. |
 
 Compose starts S3Mock and Azurite for local development. S3Mock creates the
 configured bucket and persists its objects in a named volume; it implements
 the S3 operations used by this app and is not intended for production. Local
 defaults in the root `.env.example` use development-only credentials; never
 use those credentials in a hosted deployment. To try Azurite, set
-`RESOURCE_STORAGE_PROVIDER=azure_blob` in the root `.env` before starting
-Compose. For Amazon S3, set the provider to `s3`, configure the bucket and
-region, and set `RESOURCE_S3_ENDPOINT_URL` to an empty value or remove it so
-the AWS SDK uses its normal endpoint. For Azure Blob Storage, provide a
-production connection string and container name. Keep the bucket/container
-private and grant the backend only the object read/write permissions it needs.
+`RESOURCE_STORAGE_PROVIDER=azure_blob` in the root `.env`, and set
+`RESOURCE_AZURE_CONNECTION_STRING` and `AZURITE_INIT_CONNECTION_STRING` there
+to the local Azurite connection string using the Compose endpoint
+`http://azurite:10000/devstoreaccount1`. Keep both values in the ignored local
+`.env`; do not commit them. The initializer skips Azurite setup when its
+connection string is empty, so the default S3 setup needs no Azure credentials.
+For Amazon S3, set the provider to `s3`, configure the bucket and region, and
+set `RESOURCE_S3_ENDPOINT_URL` to an empty value or remove it so the AWS SDK
+uses its normal endpoint. For Azure Blob Storage deployments, provide a
+production connection string and container name outside the local Compose
+configuration. Keep the bucket/container private and grant the backend only
+the object read/write permissions it needs.
 
 ## Accounts, workspace, and MCP credentials
 
