@@ -202,3 +202,9 @@ bearer tokens, or workspace secret values.
   React-driven validation (`noValidate` plus explicit rules); do not use
   browser constraint-validation attributes or native validity APIs as the
   validation mechanism.
+- `docs/` is the user-facing, dependency-free GitHub Pages portal, published
+  from the `main` branch's `/docs` folder at `mcpkite.com`; it is separate from
+  the FastAPI API reference at `/docs`. Keep the portal in plain HTML/CSS,
+  maintain shared navigation and styles across pages, and verify local links,
+  anchors, and responsive layouts when changing it. See
+  [README.md](README.md#documentation-portal) for publishing and domain setup.
