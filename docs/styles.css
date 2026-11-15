@@ -116,6 +116,25 @@ summary {
   font-size: 0.9rem;
 }
 
+.repository-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--blue-dark);
+  font-weight: 600;
+}
+
+.github-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+  fill: currentColor;
+}
+
+.repository-link:hover {
+  color: var(--teal);
+}
+
 .page-width {
   width: min(100% - 3rem, var(--content-width));
   margin: 0 auto;

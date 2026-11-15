@@ -9,6 +9,8 @@ Browse [mcpkite.com](https://mcpkite.com) for
 getting started, server and client setup, tools, prompts, resources, workspace
 settings, deployment, and troubleshooting.
 
+Repository: [https://github.com/imtarundhiman/mcpkite](https://github.com/imtarundhiman/mcpkite)
+
 To publish it with GitHub Pages, open the repository's **Settings → Pages**,
 choose **Deploy from a branch**, select the `main` branch and `/docs` folder,
 then save and set the Pages custom domain to `mcpkite.com`. The documentation
