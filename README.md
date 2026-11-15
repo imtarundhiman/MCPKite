@@ -5,15 +5,15 @@ Server definitions are stored in PostgreSQL.
 
 ## Documentation portal
 
-Browse the [MCPKite documentation](docs/index.html) for getting started,
-server and client setup, tools, prompts, resources, workspace settings,
-deployment, and troubleshooting.
+Browse the [MCPKite documentation at mcpkite.com](https://mcpkite.com) for
+getting started, server and client setup, tools, prompts, resources, workspace
+settings, deployment, and troubleshooting.
 
 To publish it with GitHub Pages, open the repository's **Settings → Pages**,
 choose **Deploy from a branch**, select the `main` branch and `/docs` folder,
-then save. The site is served from the repository's GitHub Pages URL. The
-documentation is plain HTML and CSS and can also be opened locally at
-`docs/index.html`.
+then save and set the Pages custom domain to `mcpkite.com`. The documentation
+source is plain HTML and CSS in [`docs/`](docs/), and can be opened locally at
+[`docs/index.html`](docs/index.html).
 
 ## Run with Docker Compose
 
