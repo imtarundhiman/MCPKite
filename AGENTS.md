@@ -193,6 +193,10 @@ bearer tokens, or workspace secret values.
   and clamp stale page requests after records are removed.
 - Keep shared UI responsive and keyboard accessible: retain visible focus,
   active-state indication, touch target sizes, and no horizontal overflow.
+- Keep editor text and caret colors legible against their backgrounds. The
+  prompt template editor uses the dark `.code-editor` surface, so explicitly
+  set a light foreground and caret color instead of inheriting the global
+  textarea `--ink` color.
 - For user-facing forms, reuse `src/components/ui/FormPrimitives.tsx` for
   required/optional labels, inline field errors, required-field notes, and
   focusable error summaries. Validate user input on blur and submit, preserve
