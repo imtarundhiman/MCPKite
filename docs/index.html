@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Guides for building, connecting, and operating MCPKite servers.">
-    <title>MCPKite documentation</title>
+    <meta name="description" content="Deploy MCPKite once, create MCP servers and capabilities on demand, and run Python tools in isolated sandboxes.">
+    <title>MCPKite — one deployment for multiple MCP servers</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -23,30 +23,31 @@
     <main id="main" class="page-width home">
       <section class="home-intro" aria-labelledby="page-title">
         <div class="home-copy">
-          <h1 id="page-title">Build an MCP endpoint that fits your workflow.</h1>
+          <h1 id="page-title">Deploy once. Add MCP servers as you grow.</h1>
           <p>
-            Create a workspace, shape the tools and context you want to share,
-            then connect an MCP client to your server.
+            Keep one MCPKite application running. Create server endpoints, tools,
+            prompts, and resources whenever your team needs them—without
+            redeploying MCPKite for each change.
           </p>
           <div class="home-actions">
             <a class="button-link" href="getting-started.html">Get started</a>
             <a class="button-link secondary" href="servers.html">Connect a client</a>
           </div>
         </div>
-        <div class="flow" aria-label="MCPKite connection flow">
+        <div class="flow" aria-label="One MCPKite deployment can serve multiple MCP servers">
           <div class="flow-step">
             <span class="flow-symbol" aria-hidden="true">01</span>
-            <span><strong>Workspace</strong><span>Build server capabilities</span></span>
+            <span><strong>Deploy MCPKite once</strong><span>One FastAPI application stays online</span></span>
           </div>
           <span class="flow-connector" aria-hidden="true"></span>
           <div class="flow-step">
             <span class="flow-symbol" aria-hidden="true">02</span>
-            <span><strong>MCP endpoint</strong><span>Publish over Streamable HTTP</span></span>
+            <span><strong>Add MCP servers on demand</strong><span>Give each server its own endpoint</span></span>
           </div>
           <span class="flow-connector" aria-hidden="true"></span>
           <div class="flow-step">
             <span class="flow-symbol" aria-hidden="true">03</span>
-            <span><strong>MCP client</strong><span>Discover and call capabilities</span></span>
+            <span><strong>Connect MCP clients</strong><span>Use each server's endpoint</span></span>
           </div>
         </div>
       </section>
@@ -83,13 +84,15 @@
       </section>
 
       <section class="home-section" aria-labelledby="trust-title">
-        <h2 id="trust-title">Know the boundary</h2>
+        <h2 id="trust-title">Python tools run in isolation</h2>
         <p>
-          MCPKite keeps management behind workspace authentication and runs
-          saved Python tools in short-lived sandbox containers. For a hosted
-          deployment, follow the operator guide before exposing the service.
+          Saved tools execute in short-lived sandbox containers, not inside the
+          FastAPI application. Each call runs with resource limits and without
+          host mounts or deployment credentials.
         </p>
-        <a href="deployment.html#production">Review the production checklist</a>
+        <a href="tools.html#runtime">How tool execution works</a>
+        <span aria-hidden="true"> · </span>
+        <a href="deployment.html#trust-boundaries">Review runtime trust boundaries</a>
       </section>
 
       <footer class="site-footer">
