@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Manage MCPKite workspace members, tokens, variables, and secrets.">
+    <title>Workspace settings · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <span class="header-note">Documentation for builders and operators</span>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation"><p class="sidebar-title">Guides</p><nav class="topic-nav">
+        <a href="index.html">Overview</a><a href="getting-started.html">Getting started</a><a href="servers.html">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html">Prompts</a><a href="resources.html">Resources</a><a href="settings.html" aria-current="page">Workspace settings</a><a href="deployment.html">Deployment</a><a href="troubleshooting.html">Troubleshooting</a>
+      </nav></aside>
+      <main class="article">
+        <header class="article-header"><h1>Workspace settings</h1><p>Manage who can access a workspace and which values and credentials its MCP capabilities can use.</p></header>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#members">Accounts and members</a></li><li><a href="#tokens">Server tokens</a></li><li><a href="#values">Variables and secrets</a></li><li><a href="#deletion">Delete servers and files</a></li>
+        </ul></nav>
+
+        <h2 id="members">Accounts and members</h2>
+        <p>The first account becomes the workspace owner. Later accounts can join using an invitation link created by the owner from Settings. Invitations can be revoked; only the owner can invite or remove members. Workspace members share servers, variables, and secrets.</p>
+
+        <h2 id="tokens">Server tokens</h2>
+        <p>Create a server token in <strong>Settings → Server tokens</strong> when an endpoint should require bearer authentication. The generated token is shown only once; the database stores only its hash. Save it securely before closing the creation view.</p>
+        <p>A token can be assigned to one server at a time. Detach it before deletion or reassignment. Switching a server to normal access detaches its token. The token protects an MCP endpoint; it is not an account password or a workspace secret.</p>
+
+        <h2 id="values">Variables and secrets</h2>
+        <p>Workspace variables can hold shared configuration. Ordinary variable values are visible in Settings. Secret values are encrypted at rest and are never returned by the management API after saving; replace a secret with a new value to change it.</p>
+        <p>The deployment-managed <code>WORKSPACE_SECRET_ENCRYPTION_KEY</code> is required to save or use secrets. It must remain stable and backed up. Losing the key makes existing encrypted secrets unreadable.</p>
+        <p>Reference a value in a prompt or text resource as <code>${NAME}</code>, or access it in a Python tool with <code>os.environ["NAME"]</code>. Current-workspace values are supplied to each tool call's isolated sandbox. A value referenced in a prompt or resource becomes part of the response and is visible to the requesting client.</p>
+        <div class="callout"><p>Only use secret references in content intended for clients you trust. Encryption at rest does not hide a secret after an MCP client receives it.</p></div>
+
+        <h2 id="deletion">Delete servers and files</h2>
+        <p>Deleting a server permanently removes its tools, prompts, resources, and uploaded resource files. Its assigned server token is retained as an unassigned token. Workspace variables and secrets are not affected.</p>
+        <p>Deleting an individual binary resource also removes its stored file. Confirm the target before deleting; the removed content cannot be restored from MCPKite.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Start MCPKite locally with Docker Compose.">
+    <title>Getting started · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <span class="header-note">Documentation for builders and operators</span>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation">
+        <p class="sidebar-title">Guides</p>
+        <nav class="topic-nav">
+          <a href="index.html">Overview</a><a href="getting-started.html" aria-current="page">Getting started</a><a href="servers.html">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html">Prompts</a><a href="resources.html">Resources</a><a href="settings.html">Workspace settings</a><a href="deployment.html">Deployment</a><a href="troubleshooting.html">Troubleshooting</a>
+        </nav>
+      </aside>
+      <main class="article">
+        <header class="article-header">
+          <h1>Getting started</h1>
+          <p>Run the full development stack, create your workspace, and open the builder.</p>
+        </header>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#requirements">Requirements</a></li><li><a href="#configure">Configure local files</a></li><li><a href="#run">Start the stack</a></li><li><a href="#first-login">Create your workspace</a></li><li><a href="#inspect">Try an MCP endpoint</a></li>
+        </ul></nav>
+
+        <h2 id="requirements">Requirements</h2>
+        <p>Use Docker with the Compose plugin. The default stack includes PostgreSQL, the API, the frontend, an isolated tool runner, local object-storage services, and MCP Inspector.</p>
+
+        <h2 id="configure">Configure local files</h2>
+        <p>From the repository root, copy the example files. The copies are ignored by Git and are for local development.</p>
+        <pre><code>cp -n backend/.env.example backend/.env
+cp -n frontend/.env.example frontend/.env
+cp -n .env.example .env</code></pre>
+        <p>Set a private, persistent <code>WORKSPACE_SECRET_ENCRYPTION_KEY</code> in <code>backend/.env</code> before saving reusable secrets. Generate a 32-byte key with <code>openssl rand -base64 32</code> and keep a secure backup alongside the database backup. If the key is lost, encrypted values cannot be decrypted.</p>
+        <p>Set <code>PGADMIN_DEFAULT_EMAIL</code> and <code>PGADMIN_DEFAULT_PASSWORD</code> in the root <code>.env</code> before starting the stack. Never use development defaults for a hosted deployment.</p>
+
+        <h2 id="run">Start the stack</h2>
+        <pre><code>docker compose up --build</code></pre>
+        <p>Open the app at <a href="http://localhost:8080">http://localhost:8080</a>. The management API docs are at <a href="http://localhost:8000/docs">http://localhost:8000/docs</a>. MCP Inspector is available at <a href="http://localhost:6274">http://localhost:6274</a>; its port is bound to the local machine.</p>
+        <p>The frontend runs in Vite development mode with hot reload. Backend code changes reload automatically. Rebuild a container only after changing its dependencies or Dockerfile.</p>
+
+        <h2 id="first-login">Create your workspace</h2>
+        <p>The first account becomes the workspace owner. On an existing installation, the first signup adopts server definitions already in the database into that workspace. Later accounts need a one-time invitation link from the owner.</p>
+        <p>Start by creating a server, then add a tool, prompt, or resource from its capability workspace. See <a href="servers.html">Servers and clients</a> for endpoint setup, or follow an individual guide from the overview.</p>
+
+        <h2 id="inspect">Try an MCP endpoint</h2>
+        <ol>
+          <li>Create and save a tool in the server's Tools workspace.</li>
+          <li>In MCP Inspector, add a Streamable HTTP connection using <code>http://backend:8000</code> followed by the endpoint path shown in MCPKite.</li>
+          <li>For a protected endpoint, enter its server bearer token in the Inspector authorization field. It is not your MCPKite login.</li>
+          <li>Connect, open Tools, and call the saved tool with valid, safe arguments.</li>
+        </ol>
+        <p>Inspector runs inside Docker, so use the Compose hostname <code>backend</code>. Host-based clients use the host-facing endpoint from the Connect guide instead.</p>
+        <p>To stop the stack, run <code>docker compose down</code>. To also remove saved database and storage data, run <code>docker compose down --volumes</code>; this permanently deletes that local data.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>

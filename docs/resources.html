@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Publish MCP text and file resources with MCPKite.">
+    <title>Resources · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <span class="header-note">Documentation for builders and operators</span>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation"><p class="sidebar-title">Guides</p><nav class="topic-nav">
+        <a href="index.html">Overview</a><a href="getting-started.html">Getting started</a><a href="servers.html">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html">Prompts</a><a href="resources.html" aria-current="page">Resources</a><a href="settings.html">Workspace settings</a><a href="deployment.html">Deployment</a><a href="troubleshooting.html">Troubleshooting</a>
+      </nav></aside>
+      <main class="article">
+        <header class="article-header"><h1>Resources</h1><p>Give clients stable context with text resources, URI templates, and uploaded files.</p></header>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#text">Create a text resource</a></li><li><a href="#templates">Use URI templates</a></li><li><a href="#files">Upload a file</a></li><li><a href="#annotations">Annotations and limits</a></li><li><a href="#storage">Storage</a></li>
+        </ul></nav>
+
+        <h2 id="text">Create a text resource</h2>
+        <p>In the server's Resources workspace, give a resource a URI, name, optional description, MIME type, and text content. Static URIs are useful for stable documents such as <code>docs://handbook</code>. Text content is limited to 50,000 characters.</p>
+        <p>Text resources can reference workspace values with <code>${NAME}</code>. The resolved value is included in the response to the requesting client. Do not reference secrets in resources intended for untrusted clients.</p>
+
+        <h2 id="templates">Use URI templates</h2>
+        <p>Use a URI template when clients should select among related pieces of content, for example <code>docs://{document_id}</code>. Use the matching double-brace placeholder in the text body:</p>
+        <pre><code>URI: docs://{document_id}
+
+Content:
+Document {{document_id}} is part of the handbook.</code></pre>
+        <p>URI parameters such as <code>{{document_id}}</code> are substituted as plain text; user-authored code is not executed.</p>
+
+        <h2 id="files">Upload a file</h2>
+        <p>Binary files are published at static URIs and are limited to 50 MiB. Supported extensions are:</p>
+        <ul>
+          <li>Documents: <code>.pdf</code>, <code>.rtf</code>, <code>.doc</code>, <code>.docx</code>, <code>.xls</code>, <code>.xlsx</code>, <code>.ppt</code>, and <code>.pptx</code>.</li>
+          <li>Text and structured data: <code>.txt</code>, <code>.md</code>, <code>.markdown</code>, <code>.csv</code>, <code>.json</code>, and <code>.xml</code>.</li>
+          <li>Images: <code>.png</code>, <code>.jpg</code>, <code>.jpeg</code>, <code>.gif</code>, <code>.webp</code>, and <code>.svg</code>.</li>
+        </ul>
+        <p>MCPKite checks the selected MIME type against the file extension and reported MIME type. File bytes and storage keys are not returned by the management API; clients read them through MCP <code>resources/read</code>.</p>
+
+        <h2 id="annotations">Annotations and limits</h2>
+        <p>Resources support optional <code>audience</code> and <code>priority</code> annotations. Priority ranges from 0 to 1 in increments of 0.1. The server manages the <code>lastModified</code> value.</p>
+        <p>Subscriptions and pushed resource change notifications are not enabled in this release. Deleting a server removes its resources and uploaded files; deleting an individual file resource also removes its stored file.</p>
+
+        <h2 id="storage">Storage</h2>
+        <p>Uploaded files use one private object-storage provider configured by the deployment operator: an S3-compatible bucket or Azure Blob container. Local Compose starts S3Mock and Azurite for development; neither local emulator is intended for production.</p>
+        <p>See <a href="deployment.html#resource-storage">Resource storage configuration</a> to select and configure the provider. Keep the bucket or container private and grant the backend only the object permissions it needs.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>

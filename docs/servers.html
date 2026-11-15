@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Create MCPKite servers and connect clients over Streamable HTTP.">
+    <title>Servers and clients · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <span class="header-note">Documentation for builders and operators</span>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation"><p class="sidebar-title">Guides</p><nav class="topic-nav">
+        <a href="index.html">Overview</a><a href="getting-started.html">Getting started</a><a href="servers.html" aria-current="page">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html">Prompts</a><a href="resources.html">Resources</a><a href="settings.html">Workspace settings</a><a href="deployment.html">Deployment</a><a href="troubleshooting.html">Troubleshooting</a>
+      </nav></aside>
+      <main class="article">
+        <header class="article-header"><h1>Servers and clients</h1><p>Create a server for a coherent set of capabilities, then point an MCP client at its Streamable HTTP endpoint.</p></header>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#create">Create a server</a></li><li><a href="#endpoint">Find the endpoint</a></li><li><a href="#client">Connect a client</a></li><li><a href="#protection">Protect an endpoint</a></li><li><a href="#transport">Transport behavior</a></li>
+        </ul></nav>
+
+        <h2 id="create">Create a server</h2>
+        <p>From the server directory, start a server and give it a clear name and description. Each server has its own Tools, Prompts, Resources, and Connect views. The directory links directly to the selected server's Tools workspace.</p>
+        <p>Server definitions and capabilities belong to the authenticated workspace. Members share servers, workspace variables, and secrets; only the owner can invite or remove members.</p>
+
+        <h2 id="endpoint">Find the endpoint</h2>
+        <p>Open the server's Connect view to see and copy the endpoint URL. MCPKite serves managed endpoints over stateless Streamable HTTP. Keep the endpoint path and trailing slash intact when configuring a client.</p>
+        <p>For example, the path may look like <code>/mcp/&lt;server-id&gt;/</code>. Use the exact path displayed by the app; do not infer a production hostname from local development.</p>
+
+        <h2 id="client">Connect a client</h2>
+        <p>Choose your client environment in the Connect guide and copy the endpoint in its recommended format. The base URL depends on where the client runs:</p>
+        <ul>
+          <li>A client on your host uses the host-facing origin shown by MCPKite, commonly <code>http://localhost:8000</code> in local Compose development.</li>
+          <li>MCP Inspector running in Compose uses <code>http://backend:8000</code> followed by the server's displayed endpoint path.</li>
+          <li>A hosted client uses the public HTTPS origin configured by the deployment operator.</li>
+        </ul>
+        <p>For Inspector, open the authenticated launch URL from <code>docker compose logs inspector</code>. That URL contains a token, so keep it private. Add a Streamable HTTP server, enter the endpoint, connect, then inspect the available tools, prompts, and resources.</p>
+
+        <h2 id="protection">Protect an endpoint</h2>
+        <p>To require bearer authentication, create a server token in <strong>Settings → Server tokens</strong> and assign it to the server. The token is shown only once. Store it securely before leaving the creation screen.</p>
+        <p>Clients connect to a protected endpoint with an <code>Authorization</code> bearer header containing that server token. This credential is separate from MCPKite account cookies and workspace secrets. Each token can be assigned to one server at a time; detach it before deleting it or assigning it elsewhere.</p>
+        <p>Switching a server to normal access detaches its token. Treat an unprotected endpoint as publicly reachable by anyone who can reach its URL.</p>
+
+        <h2 id="transport">Transport behavior</h2>
+        <p>Managed MCP endpoints are protocol endpoints, not browser pages. A browser navigation GET is not an MCP request. Clients do not need to retain an <code>MCP-Session-Id</code> between calls, and the current generated tools do not keep per-client session state.</p>
+        <p>See <a href="tools.html">Python tools</a>, <a href="prompts.html">Prompts</a>, and <a href="resources.html">Resources</a> for the capabilities a client can discover.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>

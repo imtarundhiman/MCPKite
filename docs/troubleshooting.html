@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Troubleshoot MCPKite setup, endpoints, tools, resources, and deployment.">
+    <title>Troubleshooting · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <span class="header-note">Documentation for builders and operators</span>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation"><p class="sidebar-title">Guides</p><nav class="topic-nav">
+        <a href="index.html">Overview</a><a href="getting-started.html">Getting started</a><a href="servers.html">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html">Prompts</a><a href="resources.html">Resources</a><a href="settings.html">Workspace settings</a><a href="deployment.html">Deployment</a><a href="troubleshooting.html" aria-current="page">Troubleshooting</a>
+      </nav></aside>
+      <main class="article">
+        <header class="article-header"><h1>Troubleshooting</h1><p>Check which side of the workspace, endpoint, and client handoff needs attention.</p></header>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#startup">The app does not start</a></li><li><a href="#connection">A client cannot connect</a></li><li><a href="#auth">Authentication fails</a></li><li><a href="#tools">A tool is missing or fails</a></li><li><a href="#resources">A resource is missing</a></li><li><a href="#logs">Collect useful diagnostics</a></li>
+        </ul></nav>
+
+        <h2 id="startup">The app does not start</h2>
+        <ul>
+          <li>Confirm Docker and the Compose plugin are available.</li>
+          <li>Copy the three example environment files before the first run; set pgAdmin credentials in the root <code>.env</code>.</li>
+          <li>Check <code>docker compose ps</code> for services that are unhealthy or still starting.</li>
+          <li>Read local service output with <code>docker compose logs backend</code> or the relevant service name.</li>
+        </ul>
+        <p>The backend waits for PostgreSQL, the tool runner, and local resource-storage initialization. On a first launch, image builds and database migrations take time.</p>
+
+        <h2 id="connection">A client cannot connect</h2>
+        <ul>
+          <li>Copy the exact endpoint URL and trailing slash from the server's Connect view.</li>
+          <li>Use the hostname that matches where the client runs: host clients use the host-facing URL; Inspector in Compose uses <code>http://backend:8000</code>.</li>
+          <li>Use Streamable HTTP. Managed MCP endpoints are protocol endpoints; opening one as a normal browser page is not a connection test.</li>
+          <li>For hosted clients, confirm the public MCP origin and HTTPS configuration are correct.</li>
+        </ul>
+
+        <h2 id="auth">Authentication fails</h2>
+        <p>Do not confuse MCPKite's browser sign-in with an endpoint bearer token. A protected MCP server requires its assigned server token in the client's authorization header. That token is shown once when created; if it is lost, create or assign a new token.</p>
+        <p>For browser API requests from a separate UI origin, configure that exact origin in <code>CORS_ALLOWED_ORIGINS</code>. Credentialed CORS cannot use a wildcard, and cross-site authentication cookies are not supported.</p>
+
+        <h2 id="tools">A tool is missing or fails</h2>
+        <ul>
+          <li>Confirm the tool is saved and the isolated runner is healthy. Without a healthy runner, saved tools remain unpublished drafts.</li>
+          <li>Check that the function is top-level, all parameters are annotated, and a docstring is present.</li>
+          <li>Call the tool with arguments matching its published input schema.</li>
+          <li>Check the backend and runner logs for execution errors. Remember that runtime package installation is unavailable.</li>
+          <li>Review operator-configured execution, source-size, output-size, and proxy limits.</li>
+        </ul>
+
+        <h2 id="resources">A resource is missing</h2>
+        <p>Verify the resource URI and, for templates, the requested URI parameter. A text resource uses matching double-brace placeholders in its body. A binary resource must be within 50 MiB, use a supported extension and MIME type, and have working object storage credentials.</p>
+        <p>Confirm the selected S3 or Azure provider is configured and the bucket or container is private but reachable by the backend. Local S3Mock and Azurite are development emulators, not production services.</p>
+
+        <h2 id="logs">Collect useful diagnostics</h2>
+        <p>Start with the affected service's logs, such as <code>docker compose logs backend</code> or <code>docker compose logs tool-runner</code>. Reproduce with safe, representative inputs and record the time and failing endpoint path.</p>
+        <p>Before sharing diagnostics, remove cookies, Inspector launch URLs, authorization headers, server tokens, database passwords, workspace variable values, and secret values. Never include a secret in sample tool output.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Create reusable MCP prompt templates in MCPKite.">
+    <title>Prompts · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <span class="header-note">Documentation for builders and operators</span>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation"><p class="sidebar-title">Guides</p><nav class="topic-nav">
+        <a href="index.html">Overview</a><a href="getting-started.html">Getting started</a><a href="servers.html">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html" aria-current="page">Prompts</a><a href="resources.html">Resources</a><a href="settings.html">Workspace settings</a><a href="deployment.html">Deployment</a><a href="troubleshooting.html">Troubleshooting</a>
+      </nav></aside>
+      <main class="article">
+        <header class="article-header"><h1>Prompts</h1><p>Publish reusable prompt templates with named arguments that clients can fill in.</p></header>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#create">Create a prompt</a></li><li><a href="#arguments">Define arguments</a></li><li><a href="#references">Reference workspace values</a></li><li><a href="#clients">Use prompts in a client</a></li>
+        </ul></nav>
+
+        <h2 id="create">Create a prompt</h2>
+        <p>In the server's Prompts workspace, create a prompt with a name, optional description, and template text. Names start with a letter and may contain letters, numbers, underscores, and hyphens; names are limited to 64 characters. Descriptions can be up to 300 characters and templates up to 50,000 characters.</p>
+        <p>Use the template to give the client a focused instruction or context. Keep it clear about which values are supplied by the user and which are fixed in the template.</p>
+
+        <h2 id="arguments">Define arguments</h2>
+        <p>Add named arguments for the values a client should supply. Mark each argument required or optional, and set a default value where appropriate. Argument names use letters, numbers, and underscores and must not be Python keywords.</p>
+        <p>Use double braces to reference an argument in the template:</p>
+        <pre><code>Summarize the following report for {{audience}}:
+{{report}}</code></pre>
+        <p>Argument placeholders are substituted as plain text; they are not evaluated as code. MCP clients can discover the prompt and request it with the values the template needs.</p>
+
+        <h2 id="references">Reference workspace values</h2>
+        <p>A prompt may also reference a workspace variable or secret with <code>${NAME}</code>. Configure values under <strong>Settings → Variables &amp; secrets</strong>. Secret values are resolved when the prompt is requested, so the resulting prompt can expose them to the requesting MCP client.</p>
+        <div class="callout"><p>Do not place a secret reference in a prompt intended for an untrusted client. A secret is not hidden after it is interpolated into a prompt response.</p></div>
+
+        <h2 id="clients">Use prompts in a client</h2>
+        <p>Connect the client to the server and open its prompt picker. The prompt's name and description help the user choose the right template; the client asks for required arguments and sends the filled prompt to the model.</p>
+        <p>Keep prompt arguments distinct from workspace values: <code>{{argument}}</code> is client-supplied input, while <code>${NAME}</code> comes from workspace configuration.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>

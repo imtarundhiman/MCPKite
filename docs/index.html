@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Guides for building, connecting, and operating MCPKite servers.">
+    <title>MCPKite documentation</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="MCPKite documentation home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg>
+          </span>
+          <span>MCPKite</span>
+        </a>
+        <span class="header-note">Documentation for builders and operators</span>
+      </div>
+    </header>
+    <main id="main" class="page-width home">
+      <section class="home-intro" aria-labelledby="page-title">
+        <div class="home-copy">
+          <h1 id="page-title">Build an MCP endpoint that fits your workflow.</h1>
+          <p>
+            Create a workspace, shape the tools and context you want to share,
+            then connect an MCP client to your server.
+          </p>
+          <div class="home-actions">
+            <a class="button-link" href="getting-started.html">Get started</a>
+            <a class="button-link secondary" href="servers.html">Connect a client</a>
+          </div>
+        </div>
+        <div class="flow" aria-label="MCPKite connection flow">
+          <div class="flow-step">
+            <span class="flow-symbol" aria-hidden="true">01</span>
+            <span><strong>Workspace</strong><span>Build server capabilities</span></span>
+          </div>
+          <span class="flow-connector" aria-hidden="true"></span>
+          <div class="flow-step">
+            <span class="flow-symbol" aria-hidden="true">02</span>
+            <span><strong>MCP endpoint</strong><span>Publish over Streamable HTTP</span></span>
+          </div>
+          <span class="flow-connector" aria-hidden="true"></span>
+          <div class="flow-step">
+            <span class="flow-symbol" aria-hidden="true">03</span>
+            <span><strong>MCP client</strong><span>Discover and call capabilities</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="guides-title">
+        <h2 id="guides-title">Choose a guide</h2>
+        <p>Follow a setup path or look up one part of your server.</p>
+        <div class="guide-list">
+          <a class="guide-link" href="getting-started.html">
+            <strong>Getting started</strong><span>Start MCPKite locally with Docker Compose.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+          <a class="guide-link" href="servers.html">
+            <strong>Servers and clients</strong><span>Create a server and configure an MCP client.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+          <a class="guide-link" href="tools.html">
+            <strong>Python tools</strong><span>Write, save, and safely publish a tool.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+          <a class="guide-link" href="prompts.html">
+            <strong>Prompts</strong><span>Build reusable templates with typed arguments.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+          <a class="guide-link" href="resources.html">
+            <strong>Resources</strong><span>Publish text, URI templates, and private files.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+          <a class="guide-link" href="settings.html">
+            <strong>Workspace settings</strong><span>Manage members, tokens, variables, and secrets.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+          <a class="guide-link" href="deployment.html">
+            <strong>Deployment and configuration</strong><span>Prepare storage, authentication, and runtime limits.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+          <a class="guide-link" href="troubleshooting.html">
+            <strong>Troubleshooting</strong><span>Find the right endpoint, setting, or log.</span><span class="link-mark" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="trust-title">
+        <h2 id="trust-title">Know the boundary</h2>
+        <p>
+          MCPKite keeps management behind workspace authentication and runs
+          saved Python tools in short-lived sandbox containers. For a hosted
+          deployment, follow the operator guide before exposing the service.
+        </p>
+        <a href="deployment.html#production">Review the production checklist</a>
+      </section>
+
+      <footer class="site-footer">
+        <div class="footer-inner">
+          <span>MCPKite documentation</span>
+          <span><a href="#main">Back to top</a></span>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Configure and secure a production MCPKite deployment.">
+    <title>Deployment · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <span class="header-note">Documentation for builders and operators</span>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation"><p class="sidebar-title">Guides</p><nav class="topic-nav">
+        <a href="index.html">Overview</a><a href="getting-started.html">Getting started</a><a href="servers.html">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html">Prompts</a><a href="resources.html">Resources</a><a href="settings.html">Workspace settings</a><a href="deployment.html" aria-current="page">Deployment</a><a href="troubleshooting.html">Troubleshooting</a>
+      </nav></aside>
+      <main class="article">
+        <header class="article-header"><h1>Deployment and configuration</h1><p>Prepare the database, browser origin, secrets, object storage, and sandbox boundary before making MCPKite available to users.</p></header>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#production">Production checklist</a></li><li><a href="#configuration">Core configuration</a></li><li><a href="#resource-storage">Resource storage</a></li><li><a href="#limits">Sandbox limits</a></li><li><a href="#trust-boundaries">Runtime trust boundaries</a></li>
+        </ul></nav>
+
+        <h2 id="production">Production checklist</h2>
+        <ul>
+          <li>Serve the application and API over HTTPS; set <code>AUTH_COOKIE_SECURE=true</code>.</li>
+          <li>Set a stable, strong <code>AUTH_JWT_SECRET</code> of at least 32 bytes and a non-default database password.</li>
+          <li>Keep the UI and API on the same site so the existing <code>SameSite=Lax</code> authentication cookies work.</li>
+          <li>Configure exact browser origins in <code>CORS_ALLOWED_ORIGINS</code>; never use <code>*</code> with credentials.</li>
+          <li>Set and securely back up <code>WORKSPACE_SECRET_ENCRYPTION_KEY</code> together with database backups.</li>
+          <li>Use private production object storage, least-privilege storage credentials, and production-grade PostgreSQL backups.</li>
+          <li>Do not expose the runner or Docker socket. Restrict database and administration services to trusted networks.</li>
+          <li>Set the public MCP endpoint origin so the UI shows client-reachable URLs.</li>
+        </ul>
+
+        <h2 id="configuration">Core configuration</h2>
+        <p>Compose reads deployment settings from the root <code>.env</code>; the backend reads private settings from <code>backend/.env</code>; browser-visible Vite settings belong in <code>frontend/.env</code>. Never put secrets in frontend variables: Vite embeds <code>VITE_*</code> values into the browser bundle.</p>
+        <table>
+          <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>POSTGRES_PASSWORD</code></td><td>Database password; replace the local development default.</td></tr>
+            <tr><td><code>AUTH_JWT_SECRET</code></td><td>Persistent key for signing authentication tokens; use at least 32 bytes.</td></tr>
+            <tr><td><code>AUTH_COOKIE_SECURE</code></td><td>Set to <code>true</code> when serving over HTTPS.</td></tr>
+            <tr><td><code>CORS_ALLOWED_ORIGINS</code></td><td>Comma-separated exact browser origins allowed to make credentialed requests. Do not use a wildcard.</td></tr>
+            <tr><td><code>WORKSPACE_SECRET_ENCRYPTION_KEY</code></td><td>Base64-encoded 32-byte key for workspace secrets; keep stable and backed up.</td></tr>
+            <tr><td><code>VITE_API_BASE_URL</code></td><td>Browser API prefix; defaults to same-origin <code>/api/v1</code>.</td></tr>
+            <tr><td><code>VITE_MCP_ENDPOINT_BASE_URL</code></td><td>Public MCP endpoint origin shown and copied by the UI. Set it to the externally reachable origin.</td></tr>
+            <tr><td><code>RESOURCE_STORAGE_PROVIDER</code></td><td><code>s3</code> or <code>azure_blob</code> for binary resources.</td></tr>
+          </tbody>
+        </table>
+        <p>When UI and API use different ports, include the UI's exact origin in CORS settings. The frontend uses credentialed requests. Cross-site cookie authentication is not supported.</p>
+
+        <h2 id="resource-storage">Resource storage configuration</h2>
+        <p>Choose one provider and keep its bucket or container private.</p>
+        <table>
+          <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>RESOURCE_S3_BUCKET</code></td><td>Private S3-compatible bucket.</td></tr>
+            <tr><td><code>RESOURCE_S3_REGION</code></td><td>Bucket region.</td></tr>
+            <tr><td><code>RESOURCE_S3_ENDPOINT_URL</code></td><td>Optional S3-compatible endpoint; leave empty for Amazon S3.</td></tr>
+            <tr><td><code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code></td><td>Optional paired credentials; when unset, the AWS SDK credential chain is used.</td></tr>
+            <tr><td><code>RESOURCE_AZURE_CONNECTION_STRING</code></td><td>Required connection string when Azure Blob is selected.</td></tr>
+            <tr><td><code>RESOURCE_AZURE_CONTAINER</code></td><td>Private Azure Blob container name.</td></tr>
+          </tbody>
+        </table>
+        <p>Compose starts S3Mock and Azurite for local development only. For S3, configure the bucket and region; remove or empty the endpoint URL for Amazon S3. For Azure, provide the production connection string and container outside the Compose defaults.</p>
+
+        <h2 id="limits">Sandbox limits</h2>
+        <p>All execution and proxy limits are operator settings in the root <code>.env</code>; workspace members cannot change them.</p>
+        <table>
+          <thead><tr><th>Setting</th><th>Local default</th><th>What it limits</th></tr></thead>
+          <tbody>
+            <tr><td><code>TOOL_SANDBOX_CPU_LIMIT</code></td><td>1</td><td>CPU quota per sandbox and proxy container.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_MEMORY_MIB</code></td><td>256</td><td>Sandbox memory in MiB.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_PIDS_LIMIT</code></td><td>32</td><td>Maximum sandbox processes and threads.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_TIMEOUT_SECONDS</code></td><td>10</td><td>Maximum duration of a tool call.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_TMPFS_MIB</code></td><td>32</td><td>Temporary filesystem size in MiB.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_MAX_CONCURRENT_RUNS</code></td><td>4</td><td>Maximum simultaneous tool calls.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_QUEUE_TIMEOUT_SECONDS</code></td><td>2</td><td>Maximum time waiting for a runner slot.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_MAX_SOURCE_BYTES</code></td><td>20000</td><td>Maximum saved function source size in UTF-8 bytes.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_MAX_PARAMETERS</code></td><td>64</td><td>Maximum annotated function parameters.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_MAX_INPUT_BYTES</code></td><td>65536</td><td>Maximum serialized arguments per call.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_MAX_OUTPUT_BYTES</code></td><td>262144</td><td>Maximum serialized result per call.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_PROXY_MAX_CONNECTIONS</code></td><td>128</td><td>Simultaneous proxy connections per invocation.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_PROXY_IDLE_TIMEOUT_SECONDS</code></td><td>15</td><td>Proxy DNS, connection, and idle-read timeout.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_PROXY_MAX_TUNNEL_BYTES</code></td><td>10485760</td><td>Bytes transferred through one proxy connection.</td></tr>
+            <tr><td><code>TOOL_SANDBOX_PROXY_MAX_HEADER_BYTES</code></td><td>65536</td><td>Maximum HTTP proxy request-header size.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="trust-boundaries">Runtime trust boundaries</h2>
+        <p>FastAPI uses one Uvicorn worker because mounted FastMCP apps and lifecycle tasks are process-local. Do not increase the worker count without changing the runtime architecture.</p>
+        <p>The trusted runner controls Docker and has access to the Docker daemon socket. It is not exposed as a host port and must only be run on a host you trust. Tool code runs in an ephemeral non-root sandbox with no Docker access, host mounts, or deployment credentials. The per-call network includes only the sandbox and its egress proxy; the proxy resolves destinations and rejects non-public IP addresses.</p>
+        <p>Use HTTPS, strong credentials, private database and storage networks, and carefully scoped access. Never share authenticated Inspector URLs, bearer tokens, workspace secrets, or redacted logs containing credentials.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>

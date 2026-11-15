@@ -3,6 +3,18 @@
 A small React + FastAPI app for creating and listing FastMCP HTTP servers.
 Server definitions are stored in PostgreSQL.
 
+## Documentation portal
+
+Browse the [MCPKite documentation](docs/index.html) for getting started,
+server and client setup, tools, prompts, resources, workspace settings,
+deployment, and troubleshooting.
+
+To publish it with GitHub Pages, open the repository's **Settings → Pages**,
+choose **Deploy from a branch**, select the `main` branch and `/docs` folder,
+then save. The site is served from the repository's GitHub Pages URL. The
+documentation is plain HTML and CSS and can also be opened locally at
+`docs/index.html`.
+
 ## Run with Docker Compose
 
 Requirements: Docker with the Compose plugin.
