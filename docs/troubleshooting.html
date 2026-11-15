@@ -58,6 +58,7 @@
           <li>Confirm the tool is saved and the isolated runner is healthy. Without a healthy runner, saved tools remain unpublished drafts.</li>
           <li>Check that the function is top-level, all parameters are annotated, and a docstring is present.</li>
           <li>Call the tool with arguments matching its published input schema.</li>
+          <li>If a tool reports that a workspace value is not defined, save a variable or secret with that exact name under <strong>Settings &gt; Variables &amp; secrets</strong>. Required literal reads such as <code>os.environ["NAME"]</code> are checked before sandbox execution; the error never includes the value.</li>
           <li>Check the backend and runner logs for execution errors. Remember that runtime package installation is unavailable.</li>
           <li>Review operator-configured execution, source-size, output-size, and proxy limits.</li>
         </ul>

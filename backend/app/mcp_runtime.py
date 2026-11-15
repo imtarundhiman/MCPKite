@@ -160,6 +160,22 @@ def register_tool_definition(
     async def invoke_tool(**arguments: object) -> object:
         try:
             environment = await workspace_value_source.resolve(workspace_id)
+            missing_values = sorted(
+                set(contract.required_workspace_values) - environment.keys()
+            )
+            if missing_values:
+                names = ", ".join(repr(name) for name in missing_values)
+                if len(missing_values) == 1:
+                    message = (
+                        f"Workspace value {names} is not defined. "
+                        "Add it under Settings > Variables & secrets."
+                    )
+                else:
+                    message = (
+                        f"Workspace values {names} are not defined. "
+                        "Add them under Settings > Variables & secrets."
+                    )
+                raise WorkspaceConfigError(message)
             return await tool_executor.execute(
                 source,
                 contract.name,

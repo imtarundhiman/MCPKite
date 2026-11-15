@@ -25,6 +25,17 @@ class ConfigCaptureExecutor:
         return environment
 
 
+class CallCountingExecutor:
+    enabled = True
+
+    def __init__(self):
+        self.calls = 0
+
+    async def execute(self, source, function_name, arguments, environment):
+        self.calls += 1
+        return {"executed": True}
+
+
 def _client(database_path: Path) -> TestClient:
     return TestClient(
         create_app(
@@ -434,3 +445,79 @@ def test_missing_workspace_value_fails_when_an_artifact_is_used(tmp_path):
         assert payload["error"]["message"] == (
             "Workspace value 'UNDEFINED_VALUE' is not defined."
         )
+
+
+def test_tool_call_reports_missing_workspace_value_before_execution(tmp_path):
+    with _client(tmp_path / "workspace-config-missing-tool.db") as client:
+        csrf = _register(client)
+        executor = CallCountingExecutor()
+        client.app.state.tool_executor = executor
+        server = client.post(
+            "/api/v1/servers",
+            headers={"X-CSRF-Token": csrf},
+            json={"name": "Missing tool config"},
+        ).json()
+        created = client.post(
+            f"/api/v1/servers/{server['id']}/tools",
+            headers={"X-CSRF-Token": csrf},
+            json={
+                "source": (
+                    "import os\n\n"
+                    "def read_key() -> dict[str, bool]:\n"
+                    '    """Read the account API key."""\n'
+                    '    return {"configured": bool(os.environ["ACCOUNT_API_KEY"])}\n'
+                )
+            },
+        )
+        assert created.status_code == 201, created.text
+        _save_value(
+            client,
+            csrf,
+            "EXISTING_SECRET",
+            "secret",
+            "never-echo-this-secret",
+        )
+
+        request = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {"name": "read_key", "arguments": {}},
+        }
+        missing = client.post(
+            server["endpoint_path"],
+            headers=MCP_HEADERS,
+            json=request,
+        )
+        missing_result = _mcp_result(missing)
+        missing_message = missing_result["content"][0]["text"]
+
+        assert missing.status_code == 200
+        assert missing_result["isError"] is True
+        assert missing_message == (
+            "Workspace value 'ACCOUNT_API_KEY' is not defined. "
+            "Add it under Settings > Variables & secrets."
+        )
+        assert "never-echo-this-secret" not in missing_message
+        assert executor.calls == 0
+
+        configured = _save_value(
+            client,
+            csrf,
+            "ACCOUNT_API_KEY",
+            "secret",
+            "configured-secret-value",
+        )
+        assert configured.status_code == 201, configured.text
+
+        request["id"] = 2
+        present = client.post(
+            server["endpoint_path"],
+            headers=MCP_HEADERS,
+            json=request,
+        )
+        present_result = _mcp_result(present)
+
+        assert present.status_code == 200
+        assert present_result["structuredContent"] == {"executed": True}
+        assert executor.calls == 1

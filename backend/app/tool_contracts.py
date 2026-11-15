@@ -35,6 +35,7 @@ class ToolContract:
     parameters: tuple[ToolParameter, ...]
     input_schema: dict[str, Any]
     return_annotation: Any
+    required_workspace_values: tuple[str, ...]
 
 
 def _annotation_name(node: ast.expr) -> str:
@@ -106,6 +107,23 @@ def _parse_default(node: ast.expr) -> Any:
     if not isinstance(value, (str, int, float, bool, list, dict, type(None))):
         raise ValueError("Parameter defaults must be literal JSON values.")
     return value
+
+
+def _required_workspace_values(
+    function: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> tuple[str, ...]:
+    names = {
+        node.slice.value
+        for node in ast.walk(function)
+        if isinstance(node, ast.Subscript)
+        and isinstance(node.value, ast.Attribute)
+        and node.value.attr == "environ"
+        and isinstance(node.value.value, ast.Name)
+        and node.value.value.id == "os"
+        and isinstance(node.slice, ast.Constant)
+        and isinstance(node.slice.value, str)
+    }
+    return tuple(sorted(names))
 
 
 def _schema_for_parameters(
@@ -221,6 +239,7 @@ def parse_tool_source(
         parameters=parameter_tuple,
         input_schema=schema,
         return_annotation=return_annotation,
+        required_workspace_values=_required_workspace_values(function),
     )
 
 
