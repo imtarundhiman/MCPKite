@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="See what MCPKite supports today and which FastMCP server capabilities are not exposed yet.">
+    <title>Capabilities and roadmap · MCPKite</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+      <a class="brand" href="index.html" aria-label="MCPKite documentation home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h5l4 10h5M5 17h5l4-10h5"/></svg></span><span>MCPKite</span></a>
+      <a class="header-note repository-link" href="https://github.com/imtarundhiman/mcpkite" target="_blank" rel="noopener noreferrer" aria-label="MCPKite GitHub repository (opens in a new tab)"><svg class="github-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.4-1.33-1.77-1.33-1.77-1.09-.75.08-.74.08-.74 1.2.08 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.47 5.93.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.82.57A12.01 12.01 0 0 0 12 .5z"/></svg>GitHub repository</a>
+    </div></header>
+    <div id="main" class="page-width docs-layout">
+      <aside class="sidebar" aria-label="Documentation navigation"><p class="sidebar-title">Guides</p><nav class="topic-nav">
+        <a href="index.html">Overview</a><a href="getting-started.html">Getting started</a><a href="servers.html">Servers and clients</a><a href="tools.html">Python tools</a><a href="prompts.html">Prompts</a><a href="resources.html">Resources</a><a href="settings.html">Workspace settings</a><a href="deployment.html">Deployment</a><a href="capabilities-roadmap.html" aria-current="page">Capabilities and roadmap</a><a href="troubleshooting.html">Troubleshooting</a>
+      </nav></aside>
+      <main class="article">
+        <header class="article-header">
+          <h1>Capabilities and roadmap</h1>
+          <p>What MCPKite supports today, and which FastMCP server capabilities are not exposed in the product yet.</p>
+        </header>
+        <div class="callout">
+          <p>
+            This is a view of current product coverage and areas we may explore,
+            not a release commitment. Items below have no promised delivery
+            dates. MCPKite's support will continue to evolve.
+          </p>
+        </div>
+        <nav class="toc" aria-label="On this page"><p>On this page</p><ul>
+          <li><a href="#today">Supported today</a></li><li><a href="#tool-authoring">Tool authoring</a></li><li><a href="#protocol">Protocol and catalog</a></li><li><a href="#workflows">Workflows and composition</a></li><li><a href="#security-operations">Security and operations</a></li><li><a href="#version-scope">Version and scope notes</a></li>
+        </ul></nav>
+
+        <h2 id="today">Supported today</h2>
+        <p>MCPKite deploys as a long-running application that can host multiple managed MCP servers. Add or edit a server and its capabilities through the workspace instead of redeploying the MCPKite application for each change.</p>
+        <table>
+          <thead><tr><th>Area</th><th>Available in MCPKite</th></tr></thead>
+          <tbody>
+            <tr><td>Servers</td><td>Workspace-managed servers with their own MCP endpoint and normal or bearer-token-protected access.</td></tr>
+            <tr><td>Tools</td><td>One validated top-level Python function per tool, published to MCP clients when the isolated runner is available.</td></tr>
+            <tr><td>Prompts</td><td>Reusable text templates with named arguments and workspace-value references.</td></tr>
+            <tr><td>Resources</td><td>Static text resources, text URI templates, and private binary files at static URIs, with supported annotations.</td></tr>
+            <tr><td>Transport</td><td>Stateless Streamable HTTP. Clients do not need to retain protocol session IDs between calls.</td></tr>
+            <tr><td>Tool execution</td><td>Each saved Python tool call runs in a short-lived sandbox container with operator-configured limits and restricted network egress.</td></tr>
+          </tbody>
+        </table>
+
+        <h2 id="tool-authoring">Tool authoring and context</h2>
+        <ul>
+          <li><strong>Richer tool schemas and metadata.</strong> MCPKite's editor validates a focused set of Python annotations and derives input schemas from the function. It does not expose FastMCP's broader Pydantic/Annotated schema controls, tool titles, tags, icons, arbitrary metadata, or behavioral hints. See FastMCP's <a href="https://gofastmcp.com/docs/servers/tools">tool documentation</a> and <a href="https://gofastmcp.com/docs/servers/icons">icon support</a>.</li>
+          <li><strong>FastMCP context and dependency injection.</strong> User-authored sandbox functions do not receive FastMCP's <code>Context</code> or dependency-injected server values. Context-based progress reporting, MCP client logging, and protocol-compatible elicitation are therefore not configurable in MCPKite. See <a href="https://gofastmcp.com/docs/servers/context">Context</a>, <a href="https://gofastmcp.com/docs/servers/dependency-injection">dependency injection</a>, <a href="https://gofastmcp.com/docs/servers/progress">progress</a>, <a href="https://gofastmcp.com/docs/servers/logging">client logging</a>, and <a href="https://gofastmcp.com/docs/servers/elicitation">elicitation</a>.</li>
+        </ul>
+
+        <h2 id="protocol">Protocol and catalog features</h2>
+        <ul>
+          <li><strong>Resource subscriptions and change notifications.</strong> Clients cannot subscribe to resource updates or receive pushed resource-change notifications from MCPKite today.</li>
+          <li><strong>Argument completions.</strong> MCPKite does not let users provide FastMCP completion handlers for prompt arguments or resource-template parameters. See <a href="https://gofastmcp.com/docs/servers/completions">FastMCP completions</a>.</li>
+          <li><strong>MCP-level list pagination.</strong> The app paginates its management screens, but does not configure FastMCP's cursor pagination for the MCP tools, prompts, and resources lists. See <a href="https://gofastmcp.com/docs/servers/pagination">FastMCP pagination</a>.</li>
+          <li><strong>Tool search and Code Mode.</strong> Large catalogs cannot be exposed through FastMCP's <code>search_tools</code>/<code>call_tool</code> discovery pattern. Code Mode, an experimental FastMCP transform that lets a model compose tool calls through code, is also not part of the current MCPKite interface and requires an optional extra. See <a href="https://gofastmcp.com/docs/servers/transforms/tool-search">tool search</a> and <a href="https://gofastmcp.com/docs/servers/transforms/code-mode">Code Mode</a>.</li>
+        </ul>
+
+        <h2 id="workflows">Workflows and server composition</h2>
+        <ul>
+          <li><strong>Long-running background tasks.</strong> MCPKite's tool execution is request-scoped and bounded by sandbox limits; it does not expose FastMCP's task-based background execution. FastMCP Tasks requires the separate <code>fastmcp-tasks</code> package. See <a href="https://gofastmcp.com/docs/servers/tasks">FastMCP Tasks</a>.</li>
+          <li><strong>Per-user MCP session state.</strong> MCPKite endpoints are stateless and user-authored tools cannot use FastMCP's application-level session state. See <a href="https://gofastmcp.com/docs/servers/sessions">FastMCP sessions</a>.</li>
+          <li><strong>Composing other servers.</strong> MCPKite creates its own managed servers; users cannot mount or proxy another local or remote MCP server into one of them, or configure custom FastMCP providers. See <a href="https://gofastmcp.com/docs/servers/composition">composition</a> and <a href="https://gofastmcp.com/docs/servers/providers/overview">providers</a>.</li>
+          <li><strong>Component transforms and visibility.</strong> There are no per-server controls for namespace transforms, tool transformations, component visibility/version filters, or exposing prompts/resources as tools. See <a href="https://gofastmcp.com/docs/servers/transforms/transforms">transforms</a> and <a href="https://gofastmcp.com/docs/servers/versioning">versioning</a>.</li>
+          <li><strong>Interactive MCP Apps.</strong> Tools cannot return interactive UI components to supporting clients. FastMCP Apps requires an optional extra and client support. See <a href="https://gofastmcp.com/docs/apps/overview">FastMCP Apps</a>.</li>
+          <li><strong>Skills over MCP.</strong> FastMCP added Skills support in 4.2.0; it is newer than the 4.1.6 runtime inspected for this page and also depends on client support for the Skills extension. MCPKite does not expose it today. See <a href="https://gofastmcp.com/docs/servers/skills">FastMCP Skills</a>.</li>
+        </ul>
+
+        <h2 id="security-operations">Security and operations</h2>
+        <ul>
+          <li><strong>Additional authentication strategies.</strong> MCPKite offers per-server bearer tokens, but not FastMCP's OAuth/OIDC providers, OAuth proxies, multiple auth sources, incremental authorization, or identity assertion integrations. Identity assertion is marked beta upstream. See <a href="https://gofastmcp.com/docs/servers/auth/authentication">authentication</a>, <a href="https://gofastmcp.com/docs/servers/auth/remote-oauth">remote OAuth</a>, <a href="https://gofastmcp.com/docs/servers/auth/oauth-proxy">OAuth proxy</a>, <a href="https://gofastmcp.com/docs/servers/auth/oidc-proxy">OIDC proxy</a>, and <a href="https://gofastmcp.com/docs/servers/auth/multi-auth">MultiAuth</a>.</li>
+          <li><strong>FastMCP middleware and authorization policies.</strong> MCPKite does not expose per-server FastMCP middleware pipelines, rate-limiting middleware, or component-level authorization rules. See <a href="https://gofastmcp.com/docs/servers/middleware">middleware</a> and <a href="https://gofastmcp.com/docs/servers/authorization">authorization</a>.</li>
+          <li><strong>Per-server lifecycle and operations settings.</strong> Users cannot configure FastMCP-specific lifespan hooks, storage backends, or OpenTelemetry modes/exporters per server. MCPKite's own PostgreSQL, resource-storage, and deployment settings remain available separately. See <a href="https://gofastmcp.com/docs/servers/lifespan">lifespans</a>, <a href="https://gofastmcp.com/docs/servers/storage-backends">storage backends</a>, and <a href="https://gofastmcp.com/docs/servers/telemetry">telemetry</a>.</li>
+          <li><strong>Transport choices.</strong> MCPKite publishes remote stateless Streamable HTTP endpoints; users cannot choose a per-server transport such as local STDIO. SSE is a deprecated FastMCP transport and is not presented as a roadmap commitment. See <a href="https://gofastmcp.com/docs/servers/server">FastMCP server transports</a>.</li>
+        </ul>
+
+        <h2 id="version-scope">Version and scope notes</h2>
+        <p>The backend container inspected for this review resolves FastMCP 4.1.6. The declared dependency range in <code>backend/requirements.txt</code> is <code>fastmcp&gt;=2.14,&lt;5.0</code>, so another installation may resolve a different version. The list describes MCPKite's current product surface against the inspected 4.1.6 baseline; it does not guarantee identical upstream behavior across every version allowed by that range.</p>
+        <p>Some upstream capabilities need optional packages, a compatible MCP client, or a protocol version that supports the feature. FastMCP features are not automatically MCPKite features just because they exist in the library.</p>
+        <p>We will keep this page updated as MCPKite evolves. The items above are areas for consideration, not a prioritized delivery schedule or a promise to implement every upstream feature. FastMCP's full OAuth server is intentionally omitted because its own documentation describes it as an advanced approach most users should avoid; developer/testing utilities and the separate FastMCP Gateway product are outside this user-facing list.</p>
+      </main>
+    </div>
+    <footer class="site-footer"><div class="page-width footer-inner"><span>MCPKite documentation</span><a href="#main">Back to top</a></div></footer>
+  </body>
+</html>
