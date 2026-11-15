@@ -1651,7 +1651,13 @@ select { min-height: 44px; }
   background: #fff;
   color: var(--ink);
 }
-.prompt-template-editor { width: 100%; min-height: 220px; resize: vertical; }
+.prompt-template-editor {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  color: #e4ecf7;
+  caret-color: #e4ecf7;
+}
 .resource-content-editor {
   width: 100%;
   min-height: 220px;
