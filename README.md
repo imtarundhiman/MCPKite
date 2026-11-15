@@ -5,7 +5,7 @@ Server definitions are stored in PostgreSQL.
 
 ## Documentation portal
 
-Browse the [MCPKite documentation at mcpkite.com](https://mcpkite.com) for
+Browse [mcpkite.com](https://mcpkite.com) for
 getting started, server and client setup, tools, prompts, resources, workspace
 settings, deployment, and troubleshooting.
 
